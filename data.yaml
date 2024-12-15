@@ -1,0 +1,12 @@
+train: C:\Users\pakal\OneDrive\Рабочий стол\проект\train\images
+val: C:\Users\pakal\OneDrive\Рабочий стол\проект\valid\images
+
+nc: 1
+names: ['garbage']
+
+roboflow:
+  workspace: human-of-ai
+  project: trashbag-subset-3
+  version: 3
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/human-of-ai/trashbag-subset-3/dataset/3
