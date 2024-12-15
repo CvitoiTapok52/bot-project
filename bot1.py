@@ -2,7 +2,9 @@ import os
 import cv2
 from PIL import Image
 from ultralytics import YOLO
+from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes, ConversationHandler
+import uvicorn
 
 # Список подписчиков
 subscribers = set()
@@ -30,7 +32,7 @@ def detect_waste(image_path, model_path="runs/detect/train6/weights/best.pt"):
     return temp_path
 
 # Команда /start
-async def start(update, context):
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "Привет! Я бот для помощи в обнаружении и сообщении о мусоре.\n\n"
         "Отправьте фото, чтобы я мог распознать мусор, и укажите адрес, где он был найден. "
@@ -38,7 +40,7 @@ async def start(update, context):
     )
 
 # Команда /help
-async def help_command(update, context):
+async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "📋 **Доступные команды:**\n\n"
         "/start - Начало работы с ботом.\n"
@@ -51,7 +53,7 @@ async def help_command(update, context):
     )
 
 # Команда /subscribe
-async def subscribe(update, context):
+async def subscribe(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_chat.id
     if user_id not in subscribers:
         subscribers.add(user_id)
@@ -60,7 +62,7 @@ async def subscribe(update, context):
         await update.message.reply_text("Вы уже подписаны на уведомления.")
 
 # Команда /unsubscribe
-async def unsubscribe(update, context):
+async def unsubscribe(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_chat.id
     if user_id in subscribers:
         subscribers.remove(user_id)
@@ -69,7 +71,7 @@ async def unsubscribe(update, context):
         await update.message.reply_text("Вы не были подписаны на уведомления.")
 
 # Команда /stop
-async def stop(update, context):
+async def stop(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_chat.id
     if user_id in subscribers:
         subscribers.remove(user_id)
@@ -81,7 +83,7 @@ async def stop(update, context):
     )
 
 # Обработка фото
-async def handle_photo(update, context):
+async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_chat.id
     photo_file = await update.message.photo[-1].get_file()
     original_file_path = f"photos/{user_id}_photo.jpg"
@@ -98,7 +100,7 @@ async def handle_photo(update, context):
     return WAITING_FOR_ADDRESS
 
 # Обработка адреса
-async def handle_address(update, context):
+async def handle_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_chat.id
     address = update.message.text
 
@@ -145,7 +147,7 @@ async def handle_address(update, context):
     return ConversationHandler.END
 
 # Команда отмены
-async def cancel(update, context):
+async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_chat.id
     if user_id in user_data:
         del user_data[user_id]
@@ -175,7 +177,9 @@ def main():
     application.run_polling()
 
 if __name__ == "__main__":
-    main()
+    # Запуск с помощью uvicorn (для Render)
+    uvicorn.run(main, host="0.0.0.0", port=5000)
+
 
 
 
